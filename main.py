@@ -1,52 +1,52 @@
-from ai import ask_ai
-from brain import load_memory
+from router import process_command
+from utils.whisper_voice import listen
+from utils.speak import speak
 
-from commands.memory import handle_memory_command
-from commands.apps import handle_app_command
-from commands.web import handle_web_command
-from commands.system import handle_system_command
-
-from utils.voice import listen
-
-memory = load_memory()
-
-print("🤖 Friday AI Assistant Started!")
-print("Type your message or type 'voice' to use the microphone.")
+print("===================================")
+print("      🤖 Friday AI Assistant")
+print("===================================")
+print("Type 'voice' to talk.")
 print("Type 'exit' to quit.\n")
+
+speak("Hello Ayush. Friday is online.")
 
 while True:
 
-    user = input("You: ").strip()
+    try:
 
-    # Voice Mode
-    if user.lower() == "voice":
-        user = listen()
+        user = input("You: ").strip()
+
+        # Exit
+        if user.lower() == "exit":
+            process_command(user)
+            break
+
+        # Voice Mode
+        if user.lower() == "voice":
+
+            speak("Listening.")
+
+            user = listen()
+
+            if not user:
+                speak("I didn't hear anything.")
+                continue
 
         if not user:
             continue
 
-    # Handle memory commands
-    if handle_memory_command(user, memory):
-        memory = load_memory()
-        continue
+        process_command(user)
 
-    # Handle app commands
-    if handle_app_command(user):
-        continue
+    except KeyboardInterrupt:
 
-    # Handle web commands
-    if handle_web_command(user):
-        continue
+        print("\n")
 
-    # Handle system commands
-    if handle_system_command(user):
-        continue
+        speak("Shutting down.")
 
-    # Exit
-    if user.lower() == "exit":
-        print("Friday: Goodbye!")
         break
 
-    # AI Chat
-    reply = ask_ai(user)
-    print(f"\nFriday: {reply}")
+    except Exception as e:
+
+        print(f"\nError: {e}")
+
+        speak("Something went wrong.")
